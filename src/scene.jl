@@ -79,6 +79,10 @@ function add_light(s::Scene, x::T, y::T, z::T, r::T, g::T, b::T) where T <: Abst
     push!(s.lights, PointLight{T}(SVector{3, T}(x, y, z), RGB(r, g, b)))
 end
 
+function add_light(s::Scene, x::T, y::T, z::T) where T <: AbstractFloat
+    push!(s.lights, PointLight{T}(SVector{3, T}(x, y, z), RGB(1.0, 1.0, 1.0)))
+end
+
 # specify the camera using the camera origin, look at vector, up vector, and field of view angle (0, 90)
 function specify_camera(s::Scene, from_x::T, from_y::T, from_z::T, 
     at_x::T, at_y::T, at_z::T, 

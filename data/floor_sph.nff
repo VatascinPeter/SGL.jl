@@ -5,7 +5,10 @@ b 0 0 0
 v
 from -3 6 15
 at 0 0 0
-up 0 1 0  angle 45  hither 0.01  resolution 512 512
+up 0 1 0  
+angle 45  
+hither 0.01  
+resolution 512 512
 
 # svetelny kuzel
 l 12 12 30 1.2 1.2 1.2

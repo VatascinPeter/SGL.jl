@@ -21,7 +21,7 @@ function ray_trace(s::Scene)
             ray_direction = SVector{3, Float64}(normalize((s.camera_to_world * pixel_camera)[1:3] - camera_origin))
             ray = Ray(camera_origin, ray_direction)
 
-            result[j, i] = get_ray_color(s, ray, s.recursion_depth)
+            result[j, s.width - i + 1] = get_ray_color(s, ray, s.recursion_depth)
         end
     end
 
@@ -52,7 +52,7 @@ function calculate_color_phong(s::Scene, prim::Primitive, ray::Ray{T}, t::T, rec
     prim_normal = get_normal(prim, intersection_position)
     for light in s.lights        
         light_dir = normalize(light.position - intersection_position)
-        if is_obscured(s, Ray(intersection_position, light_dir), norm(light_dir - intersection_position))
+        if is_obscured(s, Ray(intersection_position, light_dir), norm(light.position - intersection_position))
             continue
         end
         light_col = SVector{3, T}(light.rgb.r, light.rgb.g, light.rgb.b)
@@ -92,9 +92,6 @@ function calculate_color_phong(s::Scene, prim::Primitive, ray::Ray{T}, t::T, rec
                 refract_dir = normalize((sqterm * (-neg_normal)) - gamma * ((VdotN * (-neg_normal)) - ray.direction))
                 refract_col = get_ray_color(s, Ray(intersection_position - s.shadow_epsilon * neg_normal, refract_dir), recur - 1)
                 rgb += prim_mat.T * SVector{3, T}(refract_col.r, refract_col.g, refract_col.b)
-            else
-                # total internal refraction
-                rgb += SVector{3, T}(1, 0, 0)
             end
         end
     end
@@ -126,7 +123,7 @@ function run_antialiasing(s::Scene, original::Matrix{RGB{Float64}})
                 b = 0.0
                 for u in 1:1:s.aa_sqrt_rays
                     for v in 1:1:s.aa_sqrt_rays
-                        pixel_camera = SVector{4, Float64}((2.0 * (j - fraction2 - (u - 1) * fraction) - s.width) * s.camera_fov_tan * inv_height,
+                        pixel_camera = SVector{4, Float64}((2.0 * (s.width - j + 1 - fraction2 - (u - 1) * fraction) - s.width) * s.camera_fov_tan * inv_height,
                         (1.0 - 2.0 * (i - fraction2 - (v - 1) * fraction) * inv_height) * s.camera_fov_tan,
                         -1.0, 1.0)
                         ray_direction = SVector{3, Float64}(normalize((s.camera_to_world * pixel_camera)[1:3] - s.camera_to_world[1:3, 4]))
