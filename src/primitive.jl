@@ -1,11 +1,12 @@
 using StaticArrays
 using LinearAlgebra
+using ColorTypes
 
 abstract type Primitive{T<:AbstractFloat} end
 
 # should not be mutable
 struct Material{T<:AbstractFloat}
-    rgb::SVector{3, T}
+    rgb::RGB{T}
 
     kd::T
     ks::T
@@ -38,7 +39,7 @@ end
 # should not be mutable
 struct PointLight{T<:AbstractFloat}
     position::SVector{3, T}
-    rgb::SVector{3, T}
+    rgb::RGB{T}
 end
 
 # should not be mutable
@@ -83,7 +84,7 @@ end
 function find_intersection(r::Ray, t::Triangle{T}) where T <: AbstractFloat
     res = -one(T)
     s1 = cross(r.direction, t.e2)
-    divisor = dot(s1, e1)
+    divisor = dot(s1, t.e1)
     if divisor != 0
         inverse_divisor = one(T) / divisor
         d = r.origin - t.v1
@@ -104,5 +105,5 @@ function get_normal(t::Triangle, ::Any)
 end
 
 function get_normal(s::Sphere{T}, point::SVector{3, T}) where T <: AbstractFloat
-    normalize(point - s.origin)
+    normalize(point - s.centre)
 end

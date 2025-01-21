@@ -1,33 +1,62 @@
-
-include("primitive.jl")
+include("data_structure.jl")
 
 mutable struct Scene{T<:AbstractFloat}
     width::Int
     height::Int
-    primitives::Vector{Primitive}
+    primitives::DataStructure
     lights::Vector{PointLight}
     current_material::Material
     camera_fov_tan::T
     camera_to_world::SMatrix{4, 4, T}
+    background_color::RGB{T}
+    shadow_epsilon::T
+    recursion_depth::Int
+    antialiasing::Bool
+    aa_max_color_diff::T
+    aa_sqrt_rays::Int
 end
 
 # create a scene that will render images in resolution (width x height)
-create_scene(width::Int, height::Int) = Scene(width, height, Vector{Primitive}(undef, 0), Vector{PointLight}(undef, 0),
-Material{Float64}(SVector{3, Float64}(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0), 
+create_scene(width::Int, height::Int) = Scene(width, height, Naive(Vector{Primitive}(undef, 0)), Vector{PointLight}(undef, 0),
+Material{Float64}(RGB(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0), 
 1.0, SMatrix{4, 4, Float64}(1.0, 0.0, 0.0, 0.0,
                              0.0, 1.0, 0.0, 0.0,
                              0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0 ,0.0, 1.0))
+                             0.0, 0.0 ,0.0, 1.0), 
+                             RGB{Float64}(0.0, 0.0, 0.0),
+                             0.0001,
+                             8,
+                             false, 0.4, 2)
 
 # defines material that will be applied to all primitives added until next set_material call
 function set_material(s::Scene, r::T, g::T, b::T, kd::T, ks::T, shine::T, t::T, ior::T) where T <: AbstractFloat
-    s.current_material = Material{T}(SVector{3, T}(r, g, b), kd, ks, shine, t, ior)
+    s.current_material = Material{T}(RGB(r, g, b), kd, ks, shine, t, ior)
+end
+
+function set_background_color(s::Scene, r::T, g::T, b::T) where T <: AbstractFloat
+    s.background_color = RGB(r, g, b)
+end
+
+function set_shadow_epsilon(s::Scene, e::T) where T <: AbstractFloat
+    s.shadow_epsilon = e
+end
+
+function set_recursion_depth(s::Scene, r::Int)
+    s.recursion_depth = r
+end
+
+function set_antialiasing(s::Scene, diff::T, sqrt_rays::Int) where T <: AbstractFloat
+    s.antialiasing = true
+    s.aa_max_color_diff = diff
+    s.aa_sqrt_rays = sqrt_rays
+end
+
+function disable_antialiasing(s::Scene)
+    s.antialiasing = false
 end
 
 # adds a triangle to the scene
 function add_triangle(s::Scene, x1::T, y1::T, z1::T, x2::T, y2::T, z2::T, x3::T, y3::T, z3::T) where T <: AbstractFloat
-    
-    println("AAAAAAAAA")
     v1 = SVector{3, T}(x1, y1, z1)
     v2 = SVector{3, T}(x2, y2, z2)
     v3 = SVector{3, T}(x3, y3, z3)
@@ -36,14 +65,18 @@ function add_triangle(s::Scene, x1::T, y1::T, z1::T, x2::T, y2::T, z2::T, x3::T,
     e2 = v3 - v1
     normal = normalize(cross(e1, e2))
 
-    push!(s.primitives, Triangle{T}(v1, v2, v3, normal, e1, e2, s.current_material))
+    add_primitive(s.primitives, Triangle{T}(v1, v2, v3, normal, e1, e2, s.current_material))
 end
 
 # adds a sphere to the scene
 function add_sphere(s::Scene, x::T, y::T, z::T, r::T) where T <: AbstractFloat
     centre = SVector{3, T}(x, y, z)
 
-    push!(s.primitives, Sphere{T}(centre, r, s.current_material))
+    add_primitive(s.primitives, Sphere{T}(centre, r, s.current_material))
+end
+
+function add_light(s::Scene, x::T, y::T, z::T, r::T, g::T, b::T) where T <: AbstractFloat
+    push!(s.lights, PointLight{T}(SVector{3, T}(x, y, z), RGB(r, g, b)))
 end
 
 # specify the camera using the camera origin, look at vector, up vector, and field of view angle (0, 90)
@@ -51,11 +84,11 @@ function specify_camera(s::Scene, from_x::T, from_y::T, from_z::T,
     at_x::T, at_y::T, at_z::T, 
     up_x::T, up_y::T, up_z::T, fov::T) where T <: AbstractFloat
     
-    if fov >= 90 || fov <= 0
-        error("Field of view angle (fov) ∉ (0°, 90°).")
+    if fov >= 180 || fov <= 0
+        error("Field of view angle (fov) ∉ (0°, 180°).")
     end
 
-    s.camera_fov = fov
+    s.camera_fov_tan = tand(fov / 2)
 
     # calculate camera-to-world transformation matrix
     f = SVector{3, T}(at_x, at_y, at_z) - SVector{3, T}(from_x, from_y, from_z)
@@ -79,48 +112,9 @@ function specify_camera(s::Scene, from_x::T, from_y::T, from_z::T,
     #                                      zero(T), zero(T), zero(T), one(T))
 end
 
-# returns an image
-function ray_trace(s::Scene)
-    result = MArray{Tuple{s.width, s.height, 3}, Float64}(undef)
-    camera_origin = SVector{3, Float64}(s.camera_to_world[1:3, 4])
-    for i in 1:1:s.width
-        for j in 1:1:s.height
-            # calculate ray
-            pixel_camera = SVector{4, Float64}((2.0 * (i - 0.5) - s.width) * s.camera_fov_tan / s.height, 
-            (1.0 - 2.0 * (j - 0.5) / s.height) * s.camera_fov_tan, 
-            -1.0, 
-            1.0)
-            ray_direction = SVector{3, Float64}(normalize((s.camera_to_world * pixel_camera)[1:3] - camera_origin))
-            ray = Ray(camera_origin, ray_direction)
-
-            # TODO: make this a function and make it modular
-            # find closest intersection
-
-            best_t = Inf64
-            best_material = s.current_material
-            for prim in s.primitives
-                t = find_intersection(ray, prim)
-                if (t > 0.0 && t < best_t)
-                    best_t = t
-                    best_material = get_material(prim)
-                end
-            end
-
-            # calculate color
-            # simple, no lighting
-            result[i, j, :] .= best_material.rgb
-
-            # write color
-        end
-    end
-
-    # post processing
-    result
-end
-
 # removes all primitives from the scene (resets camera?)
 function clear_scene(s::Scene)
-    s.primitives = Vector{Primitive}(undef, 0)
+    clear_structure(s.primitives)
     s.lights = Vector{PointLight}(undef, 0)
 end
 
