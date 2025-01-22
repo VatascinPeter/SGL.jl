@@ -1,9 +1,27 @@
 using Revise
 using SGL
 using Test
+using StaticArrays
+using LinearAlgebra
+using ColorTypes
 
-@testset "SGL.jl" begin
-    # Write your tests here.
+@testset "edge intersections" begin
+    v1 = SVector{3, Float64}(0.0, 0.0, 0.0)
+    v2 = SVector{3, Float64}(0.5, 1.0, 0.0)
+    v3 = SVector{3, Float64}(1.0, 0.0, 0.0)
+
+    e1 = v2 - v1
+    e2 = v3 - v1
+    normal = normalize(cross(e1, e2))
+
+    dummy_mat = SGL.Material{Float64}(RGB(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0)
+    triangle = SGL.Triangle{Float64}(v1, v2, v3, normal, e1, e2, dummy_mat)
+    ray = SGL.Ray{Float64}(SVector{3, Float64}(0.0, 0.0, -1.0), normalize(SVector{3, Float64}(1.0, 0.0, 2.0)))
+
+    @test SGL.find_intersection(ray, triangle) ≈ sqrt(1.25) atol=0.001
+
+    sphere = SGL.Sphere{Float64}(SVector{3, Float64}(0.5, 1.0, 0.0), 1.0, dummy_mat)
+    @test SGL.find_intersection(ray, sphere) ≈ sqrt(1.25) atol=0.001
 end
 
 @testset "antialiasing alignment" begin
@@ -45,3 +63,5 @@ end
     secondary_image = ray_trace(s)
     @test primary_image == secondary_image
 end
+
+

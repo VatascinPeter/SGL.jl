@@ -1,5 +1,7 @@
 include("scene.jl")
 
+using Base.Threads
+
 # returns an image
 function ray_trace(s::Scene)
     #result = MArray{Tuple{s.width, s.height, 3}, Float64}(undef)
@@ -11,7 +13,7 @@ function ray_trace(s::Scene)
 
     camera_origin = SVector{3, Float64}(s.camera_to_world[1:3, 4])
 
-    for i in 1:1:s.width
+    Threads.@threads for i in 1:1:s.width
         for j in 1:1:s.height
             # calculate ray
             pixel_camera = SVector{4, Float64}((2.0 * (i - 0.5) - s.width) * s.camera_fov_tan / s.height, 
