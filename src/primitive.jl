@@ -63,12 +63,12 @@ function get_material(primitive::Triangle{T}) where {T<:AbstractFloat}
 end
 
 # returns float t - ray.origin + t * ray.direction = intersection point
-function find_intersection(r::Ray, s::Sphere{T}) where T <: AbstractFloat
+function find_intersection(r::Ray, s::Sphere{Float64})::Float64
     dst = r.origin - s.centre
     b = dot(dst, r.direction)
     c = dot(dst, dst) - s.radius * s.radius
     d = b * b - c
-    res = -one(T)
+    res = -1.0
 
     if d > 0
         sqrt_d = sqrt(d)
@@ -80,13 +80,13 @@ function find_intersection(r::Ray, s::Sphere{T}) where T <: AbstractFloat
 
     # backface culling
     if dot(get_normal(s, r.origin + r.direction * res), r.direction) >= 0
-        return -one(T)
+        return -1.0
     end
     res
 end
 
-function find_intersection(r::Ray, t::Triangle{T}) where T <: AbstractFloat
-    res = -one(T)
+function find_intersection(r::Ray, t::Triangle{Float64})::Float64
+    res = -1.0
     
     # backface culling
     if dot(t.normal, r.direction) >= 0
@@ -96,7 +96,7 @@ function find_intersection(r::Ray, t::Triangle{T}) where T <: AbstractFloat
     s1 = cross(r.direction, t.e2)
     divisor = dot(s1, t.e1)
     if divisor != 0
-        inverse_divisor = one(T) / divisor
+        inverse_divisor = one(Float64) / divisor
         d = r.origin - t.v1
         b1 = dot(d, s1) * inverse_divisor
         if b1 >= 0 && b1 <= 1

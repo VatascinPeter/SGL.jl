@@ -109,7 +109,7 @@ function raytrace_scene(file_name::String)
     end
     
     println("RayTracing")
-    @time ray_trace($s)
+    @time ray_trace(s)
     println("Reformatting")
     array_image = ray_trace(s)
 

@@ -58,6 +58,30 @@ using ColorTypes
     @test SGL.find_intersection(ray7, sphere) < 0.0
 end
 
+@testset "perfect diffuse and specular surfaces" begin
+    s = create_scene(10, 10)
+    set_material(s, 0.5, 0.7, 0.3, 1.0, 0.0, 1.0, 0.0, 1.0)
+    add_triangle(s, 0.0, 0.0, 0.0, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0)
+    add_light(s, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0)
+
+    intersection = SVector{3, Float64}(0.5, 0.5, 0.0)
+    origin1 = SVector{3, Float64}(0.0, 0.0, -5.0)
+    origin2 = SVector{3, Float64}(5.0, 5.0, -2.0)
+
+    ray1 = SGL.Ray{Float64}(origin1, normalize(intersection - origin1))
+    ray2 = SGL.Ray{Float64}(origin2, normalize(intersection - origin2))
+
+    # has the same color from different view angles
+    @test SGL.get_ray_color(s, ray1, 3) ≈ SGL.get_ray_color(s, ray2, 3) atol=0.0001
+    prev_color = SGL.get_ray_color(s, ray2, 3)
+    set_material(s, 0.0, 0.0, 0.0, 0.0, 1.0, 1000.0, 0.0, 1.0)
+    add_triangle(s, 0.0, 0.0, 2.0, 1.0, 0.0, 2.0, 0.5, 1.0, 2.0)
+
+    ray3 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 0.5, 1.0), SVector{3, Float64}(0.0, 0.0, -1.0))
+    # perfectly reflected light has the same color as diffuse
+    @test SGL.get_ray_color(s, ray3, 3) ≈ prev_color atol=0.0001
+end
+
 @testset "antialiasing alignment" begin
     s = create_scene(600, 400)
     specify_camera(s, 275.0, 275.0, -800.0, 275.0, 275.0, 0.0, 0.0, 1.0, 0.0, 40.0)

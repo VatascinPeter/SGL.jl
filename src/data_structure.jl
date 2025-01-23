@@ -18,9 +18,10 @@ function is_empty(n::Naive)
     isempty(n.primitives)
 end
 
-function get_closest_intersection(n::Naive, ray::Ray)
+function get_closest_intersection(n::Naive, ray::Ray{Float64})
     best_t = Inf64
     best_prim = n.primitives[1]
+    t = Inf64
     for prim in n.primitives
         t = find_intersection(ray, prim)
         if (t > 0.0 && t < best_t)
@@ -33,6 +34,7 @@ end
 
 function is_obscured(n::Naive, ray::Ray, dist::T, shadow_epsilon::T) where T <: AbstractFloat
     epsilon = shadow_epsilon * dist
+    t = Inf64
     for prim in n.primitives
         t = find_intersection(ray, prim)
         if t > epsilon && t < dist - epsilon

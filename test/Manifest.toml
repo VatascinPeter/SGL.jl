@@ -153,9 +153,7 @@ version = "3.7.1"
 
 [[deps.SGL]]
 deps = ["ColorTypes", "LinearAlgebra", "Revise", "StaticArrays"]
-git-tree-sha1 = "dee0947e8cb5dd82af58b7d898a0ad5181334e3a"
-repo-rev = "main"
-repo-url = ".."
+path = "C:\\Users\\peter\\.julia\\dev\\SGL"
 uuid = "be063395-84ea-4d76-b336-fc62f537734b"
 version = "1.0.0-DEV"
 

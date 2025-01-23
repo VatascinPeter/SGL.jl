@@ -997,7 +997,7 @@ weakdeps = ["RecipesBase"]
 
 [[deps.SGL]]
 deps = ["ColorTypes", "LinearAlgebra", "Revise", "StaticArrays"]
-path = ".."
+path = "C:\\Users\\peter\\.julia\\dev\\SGL"
 uuid = "be063395-84ea-4d76-b336-fc62f537734b"
 version = "1.0.0-DEV"
 
