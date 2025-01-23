@@ -78,11 +78,21 @@ function find_intersection(r::Ray, s::Sphere{T}) where T <: AbstractFloat
         end
     end
 
+    # backface culling
+    if dot(get_normal(s, r.origin + r.direction * res), r.direction) >= 0
+        return -one(T)
+    end
     res
 end
 
 function find_intersection(r::Ray, t::Triangle{T}) where T <: AbstractFloat
     res = -one(T)
+    
+    # backface culling
+    if dot(t.normal, r.direction) >= 0
+        return res
+    end
+
     s1 = cross(r.direction, t.e2)
     divisor = dot(s1, t.e1)
     if divisor != 0

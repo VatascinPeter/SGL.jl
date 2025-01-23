@@ -69,8 +69,8 @@ function calculate_color_phong(s::Scene, prim::Primitive, ray::Ray{T}, t::T, rec
     if recur > 0
         # reflection
         if prim_mat.T != 1.0 && prim_mat.ks != 0.0
-            reflect_dir = normalize(ray.direction - 2.0 * dot(ray.direction, prim_normal) .* prim_normal)
-            reflect_col = get_ray_color(s, Ray(intersection_position + s.shadow_epsilon * (-ray.direction), reflect_dir), recur - 1)
+            reflect_dir = normalize(ray.direction - 2.0 * dot(ray.direction, prim_normal) * prim_normal)
+            reflect_col = get_ray_color(s, Ray(intersection_position + 0.01 * (-ray.direction), reflect_dir), recur - 1)
             rgb += (1.0 - prim_mat.T) * prim_mat.ks * SVector{3, T}(reflect_col.r, reflect_col.g, reflect_col.b)
         end
 
@@ -92,7 +92,7 @@ function calculate_color_phong(s::Scene, prim::Primitive, ray::Ray{T}, t::T, rec
                 sqterm = sqrt(sqterm)
 
                 refract_dir = normalize((sqterm * (-neg_normal)) - gamma * ((VdotN * (-neg_normal)) - ray.direction))
-                refract_col = get_ray_color(s, Ray(intersection_position - s.shadow_epsilon * neg_normal, refract_dir), recur - 1)
+                refract_col = get_ray_color(s, Ray(intersection_position - 0.01 * neg_normal, refract_dir), recur - 1)
                 rgb += prim_mat.T * SVector{3, T}(refract_col.r, refract_col.g, refract_col.b)
             end
         end

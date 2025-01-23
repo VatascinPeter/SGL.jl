@@ -16,12 +16,46 @@ using ColorTypes
 
     dummy_mat = SGL.Material{Float64}(RGB(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 0.0)
     triangle = SGL.Triangle{Float64}(v1, v2, v3, normal, e1, e2, dummy_mat)
-    ray = SGL.Ray{Float64}(SVector{3, Float64}(0.0, 0.0, -1.0), normalize(SVector{3, Float64}(1.0, 0.0, 2.0)))
 
-    @test SGL.find_intersection(ray, triangle) ≈ sqrt(1.25) atol=0.001
+    ray1 = SGL.Ray{Float64}(SVector{3, Float64}(0.0, 0.0, -1.0), normalize(SVector{3, Float64}(1.0, 0.0, 2.0)))
 
     sphere = SGL.Sphere{Float64}(SVector{3, Float64}(0.5, 1.0, 0.0), 1.0, dummy_mat)
-    @test SGL.find_intersection(ray, sphere) ≈ sqrt(1.25) atol=0.001
+
+    # testing for edge intersection
+    @test SGL.find_intersection(ray1, triangle) ≈ sqrt(1.25) atol=0.001
+    @test SGL.find_intersection(ray1, sphere) ≈ sqrt(1.25) atol=0.001
+
+    ray2 = SGL.Ray{Float64}(SVector{3, Float64}(0.0, 0.0, -1.0), normalize(SVector{3, Float64}(0.0, 0.0, 1.0)))
+
+    # triangle vertex intersection
+    @test SGL.find_intersection(ray2, triangle) ≈ 1.0 atol=0.0001
+
+    ray3 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 0.5, 0.0), normalize(SVector{3, Float64}(0.1, 0.1, 0.1)))
+
+    # ray starts on the surface
+    @test SGL.find_intersection(ray3, triangle) ≈ 0.0 atol=0.0001
+
+    ray4 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 0.5, -3.0), SVector{3, Float64}(0.0, 0.0, 1.0))
+
+    # sphere returns closer intersection
+    @test SGL.find_intersection(ray4, sphere) ≈ 3 - sqrt(3) / 2 atol=0.001
+
+    ray5 = SGL.Ray{Float64}(SVector{3, Float64}(0.0, 0.5, 1.0), normalize(SVector{3, Float64}(1.0, 0.0, -2.0)))
+
+    println("TRIANGLE BACKFACE: ", dot(triangle.normal, ray5.direction))
+    # triangle backface culling
+    @test SGL.find_intersection(ray5, triangle) == -1.0
+
+    ray6 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 1.0, 0.0), SVector{3, Float64}(0.0, 0.0, 1.0))
+
+    # sphere backface culling
+    @test SGL.find_intersection(ray6, sphere) == -1.0
+
+    ray7 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, -0.1, -2), SVector{3, Float64}(0.0, 0.0, 1.0))
+
+    # ray misses
+    @test SGL.find_intersection(ray7, triangle) < 0.0
+    @test SGL.find_intersection(ray7, sphere) < 0.0
 end
 
 @testset "antialiasing alignment" begin

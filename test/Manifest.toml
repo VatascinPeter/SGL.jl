@@ -153,7 +153,7 @@ version = "3.7.1"
 
 [[deps.SGL]]
 deps = ["ColorTypes", "LinearAlgebra", "Revise", "StaticArrays"]
-git-tree-sha1 = "28f6a39a73f1049ec65dd6b6e1cf9f0479be7656"
+git-tree-sha1 = "dee0947e8cb5dd82af58b7d898a0ad5181334e3a"
 repo-rev = "main"
 repo-url = ".."
 uuid = "be063395-84ea-4d76-b336-fc62f537734b"

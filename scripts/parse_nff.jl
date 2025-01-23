@@ -1,6 +1,9 @@
 using Revise
 using SGL
 
+using BenchmarkTools
+using InteractiveUtils
+
 # for image conversion
 using ColorTypes, Images, FileIO
 
@@ -106,9 +109,10 @@ function raytrace_scene(file_name::String)
     end
     
     println("RayTracing")
-    @time array_image = SGL.ray_trace(s)
+    @time ray_trace($s)
     println("Reformatting")
-    
+    array_image = ray_trace(s)
+
     image = colorview(RGB, array_image)
     
     println("Saving " * file_name * ".png")
@@ -121,8 +125,8 @@ all_files = ["basilica", "cornell-blocks", "cornell-spheres",
 "cornell-spheres-crazy", "cornell-spheres-mod", "cornell-spheres-raytrace", 
 "cornell", "envmap", "floor_sph", "sphere", "test", "uffizi"]
 
-# raytrace_scene("cornell-spheres-crazy")
+raytrace_scene("cornell-spheres-crazy")
 
-for file in all_files
-    raytrace_scene(file)
-end
+# for file in all_files
+#     raytrace_scene(file)
+# end
