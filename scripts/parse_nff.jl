@@ -109,9 +109,9 @@ function raytrace_scene(file_name::String)
     end
     
     println("RayTracing")
-    @time ray_trace(s)
+    @time array_image = ray_trace(s)
     println("Reformatting")
-    array_image = ray_trace(s)
+    @time array_image = ray_trace(s)
 
     image = colorview(RGB, array_image)
     
@@ -125,8 +125,8 @@ all_files = ["basilica", "cornell-blocks", "cornell-spheres",
 "cornell-spheres-crazy", "cornell-spheres-mod", "cornell-spheres-raytrace", 
 "cornell", "envmap", "floor_sph", "sphere", "test", "uffizi"]
 
-raytrace_scene("cornell-spheres-crazy")
+# raytrace_scene("cornell-spheres-crazy")
 
-# for file in all_files
-#     raytrace_scene(file)
-# end
+for file in all_files
+    raytrace_scene(file)
+end

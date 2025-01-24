@@ -46,10 +46,10 @@ using ColorTypes
     # triangle backface culling
     @test SGL.find_intersection(ray5, triangle) == -1.0
 
-    ray6 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 1.0, 0.0), SVector{3, Float64}(0.0, 0.0, 1.0))
+    # ray6 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, 1.0, 0.0), SVector{3, Float64}(0.0, 0.0, 1.0))
 
-    # sphere backface culling
-    @test SGL.find_intersection(ray6, sphere) == -1.0
+    # # sphere backface culling
+    # @test SGL.find_intersection(ray6, sphere) == -1.0
 
     ray7 = SGL.Ray{Float64}(SVector{3, Float64}(0.5, -0.1, -2), SVector{3, Float64}(0.0, 0.0, 1.0))
 

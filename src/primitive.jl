@@ -78,10 +78,10 @@ function find_intersection(r::Ray, s::Sphere{Float64})::Float64
         end
     end
 
-    # backface culling
-    if dot(get_normal(s, r.origin + r.direction * res), r.direction) >= 0
-        return -1.0
-    end
+    # # backface culling
+    # if dot(get_normal(s, r.origin + r.direction * res), r.direction) >= 0
+    #     return -1.0
+    # end
     res
 end
 

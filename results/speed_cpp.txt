@@ -1,0 +1,13 @@
+test 3a...NFF file sphere.nff successfully parsed.
+done in 0.19054 sec.
+test 3b...NFF file cornell-spheres.nff successfully parsed.
+done in 0.219996 sec.
+test 3c...NFF file floor_sph.nff successfully parsed.
+done in 0.164313 sec.
+test 4a...NFF file cornell-blocks.nff successfully parsed.
+done in 0.237226 sec.
+test 4b...NFF file cornell-spheres-raytrace.nff successfully parsed.
+done in 0.225105 sec.
+test 4c...NFF file cornell-spheres-crazy.nff successfully parsed.
+done in 1.46261 sec.
+TotalTime : 2.49979

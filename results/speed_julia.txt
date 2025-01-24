@@ -1,0 +1,74 @@
+
+PS C:\Users\peter\Documents\Skola\SPJ\project\SGL\scripts> julia -t 16 --project=. parse_nff.jl
+Parsing file basilica.nff
+RayTracing
+  0.670754 seconds (5.90 M allocations: 221.850 MiB, 7.94% gc time, 1118.30% compilation time)
+Reformatting
+  0.153316 seconds (5.16 M allocations: 173.226 MiB)
+Saving basilica.png
+Parsing file cornell-blocks.nff
+RayTracing
+  0.235295 seconds (8.32 M allocations: 258.966 MiB)
+Reformatting
+  0.246547 seconds (8.32 M allocations: 258.966 MiB, 27.15% gc time)
+Saving cornell-blocks.png
+Parsing file cornell-spheres.nff
+RayTracing
+  0.443470 seconds (14.04 M allocations: 441.609 MiB, 19.54% gc time)
+Reformatting
+  0.400446 seconds (14.04 M allocations: 441.609 MiB, 16.21% gc time)
+Saving cornell-spheres.png
+Parsing file cornell-spheres-crazy.nff
+RayTracing
+  1.614710 seconds (59.51 M allocations: 1.617 GiB, 11.49% gc time)
+Reformatting
+  1.555415 seconds (59.51 M allocations: 1.617 GiB, 23.17% gc time)
+Saving cornell-spheres-crazy.png
+Parsing file cornell-spheres-mod.nff
+RayTracing
+  0.206263 seconds (9.70 M allocations: 296.576 MiB)
+Reformatting
+  0.261877 seconds (9.70 M allocations: 296.576 MiB, 21.76% gc time)
+Saving cornell-spheres-mod.png
+Parsing file cornell-spheres-raytrace.nff
+RayTracing
+  0.185321 seconds (9.70 M allocations: 296.576 MiB)
+Reformatting
+  0.313270 seconds (9.70 M allocations: 296.576 MiB, 24.36% gc time)
+Saving cornell-spheres-raytrace.png
+Parsing file cornell.nff
+RayTracing
+  0.173796 seconds (8.39 M allocations: 260.730 MiB)
+Reformatting
+  0.236797 seconds (8.39 M allocations: 260.730 MiB, 31.40% gc time)
+Saving cornell.png
+Parsing file envmap.nff
+RayTracing
+  0.144728 seconds (5.16 M allocations: 173.226 MiB)
+Reformatting
+  0.189251 seconds (5.16 M allocations: 173.226 MiB, 30.66% gc time)
+Saving envmap.png
+Parsing file floor_sph.nff
+RayTracing
+  0.153604 seconds (7.32 M allocations: 231.729 MiB)
+Reformatting
+  0.201914 seconds (7.32 M allocations: 231.729 MiB, 28.98% gc time)
+Saving floor_sph.png
+Parsing file sphere.nff
+RayTracing
+  0.145310 seconds (7.57 M allocations: 238.375 MiB)
+Reformatting
+  0.234919 seconds (7.57 M allocations: 238.375 MiB, 31.04% gc time)
+Saving sphere.png
+Parsing file test.nff
+RayTracing
+  0.099718 seconds (4.16 M allocations: 144.594 MiB)
+Reformatting
+  0.095219 seconds (4.16 M allocations: 144.594 MiB)
+Saving test.png
+Parsing file uffizi.nff
+RayTracing
+  0.161908 seconds (5.16 M allocations: 173.226 MiB, 34.04% gc time)
+Reformatting
+  0.110624 seconds (5.16 M allocations: 173.226 MiB)
+Saving uffizi.png

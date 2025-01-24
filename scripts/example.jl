@@ -50,7 +50,9 @@ SGL.add_sphere(s, 170.0, 100.0, 150.0, 100.0)
 
 ray1 = SGL.Ray{Float64}(SVector{3, Float64}(275.0, 275.0, -800.0), SVector{3, Float64}(0.0, 0.0, 1.0))
 # @which SGL.find_intersection(ray1, s.primitives.primitives[end])
-#@code_warntype SGL.calculate_color_phong(s, SGL.get_prim(s.primitives, 1), ray1, 850.0, 5)
+# @code_warntype SGL.calculate_color_phong(s, SGL.get_prim(s.primitives, 1), ray1, 850.0, 5)
+@code_warntype SGL.get_ray_color(s, ray1, 5)
+
 println("RayTracing")
 @time array_image = SGL.ray_trace(s)
 println("Reformatting")
