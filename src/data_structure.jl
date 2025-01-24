@@ -20,14 +20,16 @@ end
 
 function get_closest_intersection(n::Naive, ray::Ray{Float64})
     best_t = Inf64
-    best_prim = n.primitives[1]
+    best_prim = 1
     t = Inf64
+    i = 1
     for prim in n.primitives
         t = find_intersection(ray, prim)
         if (t > 0.0 && t < best_t)
             best_t = t
-            best_prim = prim
+            best_prim = i
         end
+        i += 1
     end
     return best_t, best_prim
 end
@@ -43,4 +45,8 @@ function is_obscured(n::Naive, ray::Ray, dist::T, shadow_epsilon::T) where T <: 
     end
 
     return false
+end
+
+function get_prim(n::Naive, i::Int)
+    n.primitives[i]
 end

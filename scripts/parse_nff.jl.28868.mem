@@ -109,7 +109,7 @@
         -     end
         -     
        16     println("RayTracing")
-       96     @time ray_trace(s)
+        0     @time ray_trace(s)
        16     println("Reformatting")
         0     array_image = ray_trace(s)
         - 

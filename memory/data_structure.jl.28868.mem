@@ -1,0 +1,46 @@
+        - include("primitive.jl")
+        - 
+        - abstract type DataStructure end
+        - 
+        - struct Naive <: DataStructure
+        -     primitives::Vector{Primitive}
+        - end
+        - 
+        - function add_primitive(n::Naive, p::Primitive)
+        -     push!(n.primitives, p)
+        - end
+        - 
+        - function clear_structure(n::Naive)
+        -     n.primitives = Vector{Primitive}(undef, 0)
+        - end
+        - 
+        - function is_empty(n::Naive)
+        -     isempty(n.primitives)
+        - end
+        - 
+        - function get_closest_intersection(n::Naive, ray::Ray{Float64})
+        -     best_t = Inf64
+        0     best_prim = n.primitives[1]
+        -     t = Inf64
+        0     for prim in n.primitives
+        0         t = find_intersection(ray, prim)
+        0         if (t > 0.0 && t < best_t)
+        -             best_t = t
+        -             best_prim = prim
+        -         end
+        0     end
+960738592     return best_t, best_prim
+        - end
+        - 
+        - function is_obscured(n::Naive, ray::Ray, dist::T, shadow_epsilon::T) where T <: AbstractFloat
+        0     epsilon = shadow_epsilon * dist
+        -     t = Inf64
+        0     for prim in n.primitives
+        0         t = find_intersection(ray, prim)
+        0         if t > epsilon && t < dist - epsilon
+        0             return true
+        -         end
+        0     end
+        - 
+        0     return false
+        - end

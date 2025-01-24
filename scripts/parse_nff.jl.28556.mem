@@ -1,0 +1,132 @@
+        - using Revise
+        - using SGL
+        - 
+        - using BenchmarkTools
+        - using InteractiveUtils
+        - 
+        - # for image conversion
+        - using ColorTypes, Images, FileIO
+        - 
+        - function parse_camera(line::String)
+    26848     words = split(line)
+        - 
+        0     if isempty(words) || startswith(words[1], "#") || startswith(words[1], "B")
+        0         return
+        -     end
+        - 
+        0     cmd = words[1]
+     7360     args = parse.(Float64, words[2:end])
+        - 
+        0     if cmd == "from"
+      208         return :from, args...
+        0     elseif cmd == "at"
+       96         return :at, args...
+        0     elseif cmd == "up"
+       96         return :up, args...
+        0     elseif cmd == "angle"
+      144         return :fov, args...
+        0     elseif cmd == "resolution"
+      176         return :res, args...
+        -     end
+        - end
+        - 
+        - function parse_line(s::Scene, line::String)
+    26848     words = split(line)
+        - 
+        -     # ignore empty and comment lines
+        0     if isempty(words) || startswith(words[1], "#") || startswith(words[1], "B")
+        0         return
+        -     end
+        - 
+        0     cmd = words[1]
+     7360     args = parse.(Float64, words[2:end])
+        - 
+        0     if cmd == "b"
+       96         set_background_color(s, args...)
+        0     elseif cmd == "v" || cmd == "from" || cmd == "at" || cmd == "up" || cmd == "angle" || cmd == "hither" || cmd == "resolution"
+        -         # parsed elsewhere
+        0     elseif cmd == "l"
+      112         add_light(s, args...)
+        0     elseif cmd == "f"
+      976         set_material(s, args...)
+        0     elseif cmd == "p"
+        0         num_vertices = trunc(Int, args[1])
+        0         if num_vertices < 3
+        0             return
+        -         end
+        - 
+        0         for i in 1:1:(num_vertices - 2)
+        0             add_triangle(s, args[2], args[3], args[4], args[5 + (i - 1) * 3], args[6 + (i - 1) * 3], args[7 + (i - 1) * 3], args[8 + (i - 1) * 3], args[9 + (i - 1) * 3], args[10 + (i - 1) * 3])
+        0         end
+        0     elseif cmd == "s"
+       80         add_sphere(s, args...)
+        -     else
+        0         println("Unknown command ", cmd)
+        -     end
+        - end
+        - 
+        - function raytrace_scene(file_name::String)
+       56     file_path = "../data/" * file_name * ".nff"
+        - 
+       72     println("Parsing file " * file_name * ".nff")
+      160     camera_specs = Vector{Float64}(undef, 12)
+       16     open(file_path, "r") do io
+       96         for line in eachline(io)
+        0             res = parse_camera(line)
+        0             if isnothing(res)
+        -                 continue
+        -             end
+        -     
+        0             if res[1] == :from
+       16                 camera_specs[1] = res[2]
+       16                 camera_specs[2] = res[3]
+       16                 camera_specs[3] = res[4]
+        0             elseif res[1] == :at
+       16                 camera_specs[4] = res[2]
+       16                 camera_specs[5] = res[3]
+       16                 camera_specs[6] = res[4]
+        0             elseif res[1] == :up
+       16                 camera_specs[7] = res[2]
+       16                 camera_specs[8] = res[3]
+       16                 camera_specs[9] = res[4]
+        0             elseif res[1] == :fov
+       16                 camera_specs[10] = res[2]
+        0             elseif res[1] == :res
+       16                 camera_specs[11] = res[2]
+       16                 camera_specs[12] = res[3]
+        -             end
+     1944         end
+        -     end
+        -     
+      240     s = create_scene(trunc(Int, camera_specs[11]), trunc(Int, camera_specs[12]))
+      464     specify_camera(s, camera_specs[1:10]...)
+        0     set_recursion_depth(s, 8)
+        -     
+       16     open(file_path, "r") do io
+       96         for line in eachline(io)
+        0             parse_line(s, line)
+     1944         end
+        -     end
+        -     
+       16     println("RayTracing")
+     1552     @time ray_trace(s)
+       16     println("Reformatting")
+        0     array_image = ray_trace(s)
+        - 
+        -     image = colorview(RGB, array_image)
+        -     
+       72     println("Saving " * file_name * ".png")
+        -     # Save the resulting image to a PNG file
+       56     save("../results/" * file_name * ".png", image)
+        - end
+        - 
+        - 
+        - all_files = ["basilica", "cornell-blocks", "cornell-spheres", 
+        - "cornell-spheres-crazy", "cornell-spheres-mod", "cornell-spheres-raytrace", 
+        - "cornell", "envmap", "floor_sph", "sphere", "test", "uffizi"]
+        - 
+        - raytrace_scene("cornell-spheres-crazy")
+        - 
+        - # for file in all_files
+        - #     raytrace_scene(file)
+        - # end

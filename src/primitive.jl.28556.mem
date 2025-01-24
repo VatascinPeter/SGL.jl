@@ -1,0 +1,119 @@
+        - using StaticArrays
+        - using LinearAlgebra
+        - using ColorTypes
+        - 
+        - abstract type Primitive{T<:AbstractFloat} end
+        - 
+        - # should not be mutable
+        - struct Material{T<:AbstractFloat}
+        0     rgb::RGB{T}
+        - 
+        -     kd::T
+        -     ks::T
+        -     shine::T
+        -     T::T
+        -     ior::T
+        - end
+        - 
+        - # should not be mutable
+        - struct Triangle{T<:AbstractFloat} <: Primitive{T}
+        0     v1::SVector{3, T}
+        -     v2::SVector{3, T}
+        -     v3::SVector{3, T}
+        -     # normalized
+        -     normal::SVector{3, T}
+        -     # v2 - v1
+        -     e1::SVector{3, T}
+        -     # v3 - v1
+        -     e2::SVector{3, T}
+        -     mat::Material{T}
+        - end
+        - 
+        - # should not be mutable
+        - struct Sphere{T<:AbstractFloat} <: Primitive{T}
+        0     centre::SVector{3, T}
+        -     radius::T
+        -     mat::Material{T}
+        - end
+        - 
+        - # should not be mutable
+        - struct PointLight{T<:AbstractFloat}
+        -     position::SVector{3, T}
+        -     rgb::RGB{T}
+        - end
+        - 
+        - # should not be mutable
+        - struct Ray{T<:AbstractFloat}
+        -     origin::SVector{3, T}
+        - 
+        -     # normalized
+        -     direction::SVector{3, T}
+        - end
+        - 
+        - test_print(::Triangle) = println("This is a triangle")
+        - 
+        - test_print(::Sphere) = println("This is a sphere")
+        - 
+        - function get_material(primitive::Sphere{T}) where {T<:AbstractFloat}
+        -     return primitive.mat
+        - end
+        - 
+        - function get_material(primitive::Triangle{T}) where {T<:AbstractFloat}
+        -     return primitive.mat
+        - end
+        - 
+        - # returns float t - ray.origin + t * ray.direction = intersection point
+        - function find_intersection(r::Ray, s::Sphere{Float64})::Float64
+        0     dst = r.origin - s.centre
+        0     b = dot(dst, r.direction)
+        0     c = dot(dst, dst) - s.radius * s.radius
+        0     d = b * b - c
+        -     res = -1.0
+        - 
+        0     if d > 0
+        0         sqrt_d = sqrt(d)
+        0         res = - b - sqrt_d
+        0         if res < 0
+        0             res = -b + sqrt_d
+        -         end
+        -     end
+        - 
+        -     # backface culling
+        0     if dot(get_normal(s, r.origin + r.direction * res), r.direction) >= 0
+        0         return -1.0
+        -     end
+        0     res
+        - end
+        - 
+        - function find_intersection(r::Ray, t::Triangle{Float64})::Float64
+        -     res = -1.0
+        -     
+        -     # backface culling
+        0     if dot(t.normal, r.direction) >= 0
+        0         return res
+        -     end
+        - 
+        0     s1 = cross(r.direction, t.e2)
+        0     divisor = dot(s1, t.e1)
+        0     if divisor != 0
+        0         inverse_divisor = one(Float64) / divisor
+        0         d = r.origin - t.v1
+        0         b1 = dot(d, s1) * inverse_divisor
+        0         if b1 >= 0 && b1 <= 1
+        0             s2 = cross(d, t.e1)
+        0             b2 = dot(r.direction, s2) * inverse_divisor
+        0             if b2 >= 0 && b1 + b2 <= 1
+        0                 res = dot(t.e2, s2) * inverse_divisor
+        -             end
+        -         end
+        -     end
+        0     res
+        - end
+        - 
+        - function get_normal(t::Triangle, ::Any)
+        -     t.normal
+        - end
+        - 
+        - function get_normal(s::Sphere{T}, point::SVector{3, T}) where T <: AbstractFloat
+        0     normalize(point - s.centre)
+        - end
